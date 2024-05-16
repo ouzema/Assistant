@@ -1,36 +1,16 @@
-.chat-row {
-  display: flex;
-  margin: 5px;
-  width: 100%;
+/* styles.css */
+
+/* Set background color */
+body {
+  background-color: #f0f2f6; /* Soft indigo */
 }
 
-.row-reverse {
-  flex-direction: row-reverse;
+/* Style user text box */
+div[data-testid="stText"] {
+  background-color: #d1d5db; /* Light gray */
 }
 
-.chat-bubble {
-  font-family: "Source Sans Pro", sans-serif, "Segoe UI", "Roboto", sans-serif;
-  border: 1px solid transparent;
-  padding: 5px 10px;
-  margin: 0px 7px;
-  max-width: 70%;
-}
-
-.ai-bubble {
-  background: rgb(240, 242, 246);
-  border-radius: 10px;
-}
-
-.human-bubble {
-  background: linear-gradient(
-    135deg,
-    rgb(0, 178, 255) 0%,
-    rgb(0, 106, 255) 100%
-  );
-  color: white;
-  border-radius: 20px;
-}
-
-.chat-icon {
-  border-radius: 5px;
+/* Style assistant text box */
+div[data-testid="stText"][aria-label="Assistant:"] {
+  background-color: #93c5fd; /* Light blue */
 }

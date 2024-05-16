@@ -44,50 +44,18 @@ from examples import examples
 st.set_page_config(page_title="Leanios_core Assistant", page_icon="🤖")
 st.title("🤖 Leanios_core Assistant")
 
-INJECTION_WARNING = """
-                    SQL agent can be vulnerable to prompt injection. Use a DB role with limited permissions.
-                    Read more [here](https://python.langchain.com/docs/security).
-                    """
-LOCALDB = "USE_LOCALDB"
 
-# User inputs
-radio_opt = ["Use sample database - Chinook.db", "Connect to your SQL database"]
-selected_opt = st.sidebar.radio(label="Choose suitable option", options=radio_opt)
-if radio_opt.index(selected_opt) == 1:
-    st.sidebar.warning(INJECTION_WARNING, icon="⚠️")
-    db_uri = st.sidebar.text_input(
-        label="Database URI", placeholder="postgresql+psycopg2://postgres:postgres@localhost:5432/Leanios_development?options=-csearch_path=dummy"
-    )
-else:
-    db_uri = LOCALDB
 
-openai_api_key = st.sidebar.text_input(
-    label="OpenAI API Key",
-    type="password",
-)
-
-# Check user inputs
-if not db_uri:
-    st.info("Please enter database URI to connect to your database.")
-    st.stop()
-
-if not openai_api_key:
-    st.info("Please add your OpenAI API key to continue.")
-    st.stop()
 
 # Setup agent
-llm = OpenAI(openai_api_key=openai_api_key, temperature=0, streaming=True)
-
-
 @st.cache_resource(ttl="2h")
-def configure_db(db_uri):
-    if db_uri == LOCALDB:
-        # Make the DB connection read-only to reduce risk of injection attacks
-        # See: https://python.langchain.com/docs/security
-        db_filepath = (Path(__file__).parent / "Chinook.db").absolute()
-        creator = lambda: sqlite3.connect(f"file:{db_filepath}?mode=ro", uri=True)
-        return SQLDatabase(create_engine("sqlite:///", creator=creator))
-    return SQLDatabase.from_uri(database_uri=db_uri)
+
+def get_db():
+    return SQLDatabase.from_uri(
+        'postgresql+psycopg2://postgres:postgres@localhost:5432/Leanios_development?options=-csearch_path=dummy'
+    )
+
+db = get_db()
 
 example_selector = SemanticSimilarityExampleSelector.from_examples(
     examples,
@@ -131,7 +99,7 @@ full_prompt = ChatPromptTemplate.from_messages(
 )
 
 
-db = configure_db(db_uri)
+
 
 llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
@@ -140,8 +108,8 @@ agent = create_sql_agent(
     db=db,
     prompt=full_prompt,
     verbose=True,
-    toolkit=toolkit,
     agent_type="openai-tools",
+    handle_parsing_errors=True,
 )
 
 if "messages" not in st.session_state or st.sidebar.button("Clear message history"):
@@ -157,7 +125,6 @@ if user_query:
     st.chat_message("user").write(user_query)
 
     with st.chat_message("assistant"):
-        st_cb = StreamlitCallbackHandler(st.container())
-        response = agent.run(user_query, callbacks=[st_cb])
+        response = agent.run(user_query)
         st.session_state.messages.append({"role": "assistant", "content": response})
         st.write(response)
