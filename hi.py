@@ -49,18 +49,10 @@ llm = OpenAI(openai_api_key=openai_api_key, temperature=0, streaming=True)
 
 @st.cache_resource(ttl="2h")
 def configure_db(db_uri):
-    try:
-        engine = create_engine(db_uri)
-        connection = engine.connect()
-        connection.close()
-        return SQLDatabase(engine)
-    except OperationalError as e:
-        st.error("Could not connect to the database. Please check the database URI and ensure the PostgreSQL server is running.")
-        st.error(str(e))
-        st.stop()
+    return SQLDatabase.from_uri(database_uri=db_uri)
+
 
 db = configure_db(db_uri)
-
 
 toolkit = SQLDatabaseToolkit(db=db, llm=llm)
 
