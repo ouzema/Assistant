@@ -38,11 +38,23 @@ from langchain.chains.conversation.memory import ConversationSummaryMemory
 import streamlit.components.v1 as components
 
 from examples import examples
-import config
+
 
 st.set_page_config(page_title="Leanios_core Assistant", page_icon="🤖")
 st.title("🤖 Leanios_core Assistant")
 
+
+
+
+# Setup agent
+@st.cache_resource(ttl="2h")
+
+def get_db():
+    return SQLDatabase.from_uri(
+        'postgresql+psycopg2://postgres:postgres@localhost:5432/Leanios_development?options=-csearch_path=dummy'
+    )
+
+db = get_db()
 
 examples = [
     {"input": "What is the total quantity of product X?",
@@ -224,29 +236,6 @@ full_prompt = ChatPromptTemplate.from_messages(
 
 
 
-
-# User inputs
-radio_opt = ["Connect to your SQL database"]
-if "Connect to your SQL database" in radio_opt:
-    db_uri = st.sidebar.text_input(
-        label="Database URI", placeholder="mysql://user:pass@hostname:port/db"
-    )
-
-
-
-
-# Check user inputs
-if not db_uri:
-    st.info("Please enter database URI to connect to your database.")
-    st.stop()
-
-# Setup agent
-@st.cache_resource(ttl="2h")
-def configure_db(db_uri):
-    return SQLDatabase.from_uri(database_uri=db_uri)
-
-
-db = configure_db(db_uri)
 
 llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
