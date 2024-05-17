@@ -49,16 +49,18 @@ llm = OpenAI(openai_api_key=openai_api_key, temperature=0, streaming=True)
 
 @st.cache_resource(ttl="2h")
 def configure_db(db_uri):
-    if db_uri == LOCALDB:
-        # Make the DB connection read-only to reduce risk of injection attacks
-        # See: https://python.langchain.com/docs/security
-        db_filepath = (Path(__file__).parent / "Chinook.db").absolute()
-        creator = lambda: sqlite3.connect(f"file:{db_filepath}?mode=ro", uri=True)
-        return SQLDatabase(create_engine("sqlite:///", creator=creator))
-    return SQLDatabase.from_uri(database_uri=db_uri)
-
+    try:
+        engine = create_engine(db_uri)
+        connection = engine.connect()
+        connection.close()
+        return SQLDatabase(engine)
+    except OperationalError as e:
+        st.error("Could not connect to the database. Please check the database URI and ensure the PostgreSQL server is running.")
+        st.error(str(e))
+        st.stop()
 
 db = configure_db(db_uri)
+
 
 toolkit = SQLDatabaseToolkit(db=db, llm=llm)
 
