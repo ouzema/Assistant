@@ -235,9 +235,17 @@ if "Connect to your SQL database" in radio_opt:
 
 
 
+openai_api_key = st.sidebar.text_input(
+    label="OpenAI API Key",
+    type="password",
+)
 # Check user inputs
 if not db_uri:
     st.info("Please enter database URI to connect to your database.")
+    st.stop()
+
+if not openai_api_key:
+    st.info("Please add your OpenAI API key to continue.")
     st.stop()
 
 # Setup agent
