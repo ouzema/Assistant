@@ -41,21 +41,39 @@ import streamlit.components.v1 as components
 st.set_page_config(page_title="Leanios_core Assistant", page_icon="🤖")
 st.title("🤖 Leanios_core Assistant")
 
-openai_api_key = st.sidebar.text_input(
-    label="OpenAI API Key",
-    type="password",
-)
+openai_api_key = "sk-5GPbnSBHifhydLvCrPE7T3BlbkFJh1aSlW97quPJLGSzeDTxs"
 
 
 # Setup agent
-@st.cache_resource(ttl="2h")
+#@st.cache_resource(ttl="2h")
 
-def get_db():
-    return SQLDatabase.from_uri(
-        'postgresql+psycopg2://postgres:postgres@localhost:5432/Leanios_development?options=-csearch_path=dummy'
+
+radio_opt = ["Please insert your database credentials in here", "."]
+if radio_opt.index(selected_opt) == 1:
+    db_uri = st.sidebar.text_input(
+        label="Database URI", placeholder="mysql://user:pass@hostname:port/db"
     )
 
-db = get_db()
+
+# Check user inputs
+if not db_uri:
+    st.info("Please enter database URI to connect to your database.")
+    st.stop()
+
+if not openai_api_key:
+    st.info("Please add your OpenAI API key to continue.")
+    st.stop()
+
+# Setup agent
+llm = OpenAI(openai_api_key=openai_api_key, temperature=0, streaming=True)
+
+
+@st.cache_resource(ttl="2h")
+def configure_db(db_uri):
+    return SQLDatabase.from_uri(database_uri=db_uri)
+
+
+db = configure_db(db_uri)
 
 examples = [
     {"input": "What is the total quantity of product X?",
