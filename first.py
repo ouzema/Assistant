@@ -49,15 +49,9 @@ openai_api_key = "sk-5GPbnSBHifhydLvCrPE7T3BlbkFJh1aSlW97quPJLGSzeDTxs"
 
 
 # User inputs
-radio_opt = ["Use sample database - Chinook.db", "Connect to your SQL database"]
-selected_opt = st.sidebar.radio(label="Choose suitable option", options=radio_opt)
-if radio_opt.index(selected_opt) == 1:
-    st.sidebar.warning(INJECTION_WARNING, icon="⚠️")
-    db_uri = st.sidebar.text_input(
-        label="Database URI", placeholder="mysql://user:pass@hostname:port/db"
-    )
-else:
-    db_uri = LOCALDB
+db_uri = st.sidebar.text_input(
+    label="Database URI", placeholder="mysql://user:pass@hostname:port/db"
+)
 
 
 # Check user inputs
@@ -65,12 +59,8 @@ if not db_uri:
     st.info("Please enter database URI to connect to your database.")
     st.stop()
 
-if not openai_api_key:
-    st.info("Please add your OpenAI API key to continue.")
-    st.stop()
 
 # Setup agent
-llm = OpenAI(openai_api_key=openai_api_key, temperature=0, streaming=True)
 
 
 @st.cache_resource(ttl="2h")
