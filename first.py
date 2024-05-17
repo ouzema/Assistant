@@ -36,7 +36,7 @@ from langchain.callbacks import get_openai_callback
 from langchain.chains import ConversationChain
 from langchain.chains.conversation.memory import ConversationSummaryMemory
 import streamlit.components.v1 as components
-
+import psycopg2
 
 st.set_page_config(page_title="Leanios_core Assistant", page_icon="🤖")
 st.title("🤖 Leanios_core Assistant")
@@ -49,7 +49,22 @@ if "Connect to your SQL database" in radio_opt:
         label="Database URI", placeholder="mysql://user:pass@hostname:port/db"
     )
 
+if not db_uri:
+    st.info("Please enter database URI to connect to your database.")
+    st.stop()
 
+
+# Setup agent
+@st.cache_resource(ttl="2h")
+def configure_db(db_uri):
+    return SQLDatabase.from_uri(database_uri=db_uri)
+
+
+try:
+  engine = create_engine(db_uri)
+  st.success("Connected to database successfully!")
+except Exception as e:
+  st.error(f"Failed to connect to database: {e}")
 
 
 OPENAI_API_KEY = st.sidebar.text_input(
@@ -57,9 +72,7 @@ OPENAI_API_KEY = st.sidebar.text_input(
     type="password",
 )
 # Check user inputs
-if not db_uri:
-    st.info("Please enter database URI to connect to your database.")
-    st.stop()
+
 
 if not OPENAI_API_KEY:
     st.info("Please add your OpenAI API key to continue.")
@@ -250,10 +263,6 @@ full_prompt = ChatPromptTemplate.from_messages(
 
 
 
-# Setup agent
-@st.cache_resource(ttl="2h")
-def configure_db(db_uri):
-    return SQLDatabase.from_uri(database_uri=db_uri)
 
 
 
