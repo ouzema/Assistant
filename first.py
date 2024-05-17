@@ -37,11 +37,33 @@ from langchain.chains import ConversationChain
 from langchain.chains.conversation.memory import ConversationSummaryMemory
 import streamlit.components.v1 as components
 
-from examples import examples
-import config
 
 st.set_page_config(page_title="Leanios_core Assistant", page_icon="🤖")
 st.title("🤖 Leanios_core Assistant")
+
+
+# User inputs
+radio_opt = ["Connect to your SQL database"]
+if "Connect to your SQL database" in radio_opt:
+    db_uri = st.sidebar.text_input(
+        label="Database URI", placeholder="mysql://user:pass@hostname:port/db"
+    )
+
+
+
+
+OPENAI_API_KEY = st.sidebar.text_input(
+    label="OpenAI API Key",
+    type="password",
+)
+# Check user inputs
+if not db_uri:
+    st.info("Please enter database URI to connect to your database.")
+    st.stop()
+
+if not OPENAI_API_KEY:
+    st.info("Please add your OpenAI API key to continue.")
+    st.stop()
 
 
 examples = [
@@ -181,9 +203,12 @@ examples = [
         "query" : "SELECT products.name, customers.name, delivery_notes.created_at FROM delivery_notes JOIN workorders ON workorders.order_id = delivery_notes.order_id JOIN products ON products.id = workorders.product_id JOIN orders ON orders.id = workorders.order_id JOIN customers ON customers.id = orders.customer_id;"
     }
 ]
+
+openai_embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+
 example_selector = SemanticSimilarityExampleSelector.from_examples(
     examples,
-    OpenAIEmbeddings(),
+    openai_embeddings,
     FAISS,
     k=5,
     input_keys=["input"],
@@ -225,38 +250,16 @@ full_prompt = ChatPromptTemplate.from_messages(
 
 
 
-# User inputs
-radio_opt = ["Connect to your SQL database"]
-if "Connect to your SQL database" in radio_opt:
-    db_uri = st.sidebar.text_input(
-        label="Database URI", placeholder="mysql://user:pass@hostname:port/db"
-    )
-
-
-
-
-openai_api_key = st.sidebar.text_input(
-    label="OpenAI API Key",
-    type="password",
-)
-# Check user inputs
-if not db_uri:
-    st.info("Please enter database URI to connect to your database.")
-    st.stop()
-
-if not openai_api_key:
-    st.info("Please add your OpenAI API key to continue.")
-    st.stop()
-
 # Setup agent
 @st.cache_resource(ttl="2h")
 def configure_db(db_uri):
     return SQLDatabase.from_uri(database_uri=db_uri)
 
 
+
 db = configure_db(db_uri)
 
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+llm = ChatOpenAI(api_key=OPENAI_API_KEY, model="gpt-3.5-turbo", temperature=0)
 
 agent = create_sql_agent(
     llm=llm,
