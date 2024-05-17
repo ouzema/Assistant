@@ -53,6 +53,9 @@ if not db_uri:
     st.info("Please enter database URI to connect to your database.")
     st.stop()
 
+if not OPENAI_API_KEY:
+    st.info("Please add your OpenAI API key to continue.")
+    st.stop()
 
 # Setup agent
 @st.cache_resource(ttl="2h")
@@ -74,9 +77,6 @@ OPENAI_API_KEY = st.sidebar.text_input(
 # Check user inputs
 
 
-if not OPENAI_API_KEY:
-    st.info("Please add your OpenAI API key to continue.")
-    st.stop()
 
 
 examples = [
