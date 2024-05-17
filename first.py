@@ -48,11 +48,16 @@ openai_api_key = "sk-5GPbnSBHifhydLvCrPE7T3BlbkFJh1aSlW97quPJLGSzeDTxs"
 #@st.cache_resource(ttl="2h")
 
 
-radio_opt = ["Please insert your database credentials in here", "."]
+# User inputs
+radio_opt = ["Use sample database - Chinook.db", "Connect to your SQL database"]
+selected_opt = st.sidebar.radio(label="Choose suitable option", options=radio_opt)
 if radio_opt.index(selected_opt) == 1:
+    st.sidebar.warning(INJECTION_WARNING, icon="⚠️")
     db_uri = st.sidebar.text_input(
         label="Database URI", placeholder="mysql://user:pass@hostname:port/db"
     )
+else:
+    db_uri = LOCALDB
 
 
 # Check user inputs
