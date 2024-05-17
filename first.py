@@ -43,7 +43,10 @@ from examples import examples
 st.set_page_config(page_title="Leanios_core Assistant", page_icon="🤖")
 st.title("🤖 Leanios_core Assistant")
 
-
+openai_api_key = st.sidebar.text_input(
+    label="OpenAI API Key",
+    type="password",
+)
 
 
 # Setup agent
