@@ -2,7 +2,7 @@ from langchain_core.example_selectors import SemanticSimilarityExampleSelector
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from dotenv import load_dotenv
-load_dotenv()
+#load_dotenv()
 
 examples = [
     {"input": "What is the total quantity of product X?",
