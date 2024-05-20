@@ -39,7 +39,8 @@ import streamlit.components.v1 as components
 
 from examples import examples
 
-
+from dotenv import load_dotenv
+load_dotenv()
 st.set_page_config(page_title="Leanios_core Assistant", page_icon="🤖")
 st.title("🤖 Leanios_core Assistant")
 
