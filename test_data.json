@@ -1,0 +1,26 @@
+[
+    {
+        "input_query": "Show me the products that have been delivered.",
+        "true_sql": "SELECT products.name, customers.name, delivery_notes.created_at FROM delivery_notes JOIN workorders ON workorders.order_id = delivery_notes.order_id JOIN products ON products.id = workorders.product_id JOIN orders ON orders.id = workorders.order_id JOIN customers ON customers.id = orders.customer_id;"
+    },
+    {
+        "input_query": "Show me the total revenue for each product category.",
+        "true_sql": "SELECT category, SUM(total_amount) AS revenue FROM orders JOIN order_items ON orders.id = order_items.order_id JOIN products ON order_items.product_id = products.id GROUP BY category;"
+    },
+    {
+        "input_query": "What is the production rate by item?",
+        "true_sql": "SELECT products.name AS 'Product Name', COUNT(productions.id) AS 'Number of Productions', SUM(productions.quantity) AS 'Total Quantity Produced', AVG(productions.performance) AS 'Average Production Rate' FROM productions JOIN products ON productions.product_id = products.id GROUP BY products.name;"
+    },
+    {
+        "input_query": "List all products with a price greater than $20.",
+        "true_sql": "SELECT product_name FROM products WHERE price > 20;"
+    },
+    {
+        "input_query": "Show all orders made by user with user_id 1.",
+        "true_sql": "SELECT * FROM orders WHERE user_id = 1;"
+    },
+    {
+        "input_query": "Find the average rating for product with product_id 2.",
+        "true_sql": "SELECT AVG(rating) FROM reviews WHERE product_id = 2;"
+    }
+]
