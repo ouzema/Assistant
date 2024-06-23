@@ -10,7 +10,8 @@ from langchain.sql_database import SQLDatabase
 from langchain.agents.agent_types import AgentType
 from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
 #from langchain.callbacks import StreamlitCallbackHandler
-from langchain.agents.agent_toolkits import SQLDatabaseToolkit
+from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
+#from langchain.agents.agent_toolkits import SQLDatabaseToolkit
 from sqlalchemy import create_engine
 import sqlite3
 
@@ -54,16 +55,40 @@ load_dotenv()
 st.set_page_config(page_title="Leanios_core Assistant", page_icon="🤖")
 st.title("🤖 Leanios_core Assistant")
 
+database_name = os.getenv('DATABASE_NAME')
+database_user = os.getenv('DATABASE_USER')
+database_password = os.getenv('DATABASE_PASSWORD')
+database_host = os.getenv('DATABASE_HOST')
+database_port = os.getenv('DATABASE_PORT')
 openai_api_key = os.getenv('OPENAI_API_KEY')
 
 # Function to get database connection with dynamic schema based on URL parameter
 @st.cache_resource(ttl="2h")
-def get_db():
-    return SQLDatabase.from_uri(
-        'postgresql+psycopg2://postgres:postgres@localhost:5432/Leanios_development?options=-csearch_path=dummy'
+def get_db(subdomain):
+    db_url = URL(
+        drivername='postgresql+psycopg2',
+        username=database_user,
+        password=database_password,
+        host=database_host,
+        port=database_port,
+        database=database_name,
+        query={'options': f'-csearch_path={subdomain}'}
     )
+    engine = create_engine(db_url)
+    return SQLDatabase(engine)
 
-db = get_db()
+
+# Parse the URL to get the subdomain parameter
+query_params = st.experimental_get_query_params()
+subdomain = query_params.get('subdomain', ['dummy'])[0]
+
+# Ensure the subdomain is visible in the URL
+if 'subdomain' not in query_params:
+    st.experimental_set_query_params(subdomain='dummy')
+    st.experimental_rerun()
+
+# Get the database connection
+db = get_db(subdomain)
 
 
 example_selector = SemanticSimilarityExampleSelector.from_examples(
